@@ -1,35 +1,37 @@
 {
-  description = "An example NixOS configuration";
-
+  description = "My Flake File";
   inputs = {
-    nixpkgs = { url = "github:nixos/nixpkgs/nixos-24.11"; };
-    home-manager.url = "github:nix-community/home-manager/release-24.11";
+    nixpkgs.url = "nixpkgs/nixos-unstable";
+    home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    # illogical-impulse.url = "github:bigsaltyfishes/end-4-dots";
-    # illogical-impulse.inputs.nixpkgs.follows = "nixpkgs";
-  };
 
-  outputs = { self, nixpkgs, home-manager, ... }: 
-    let 
+    hyprland.url = "github:hyprwm/Hyprland";
+    hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
+    hyprland-plugins.inputs.hyprland.follows = "hyprland";
+    illogical-impulse.url = "github:bigsaltyfishes/end-4-dots";
+    illogical-impulse.inputs.nixpkgs.follows = "nixpkgs";
+
+  };
+  outputs = { self, nixpkgs, home-manager, ... } @inputs:
+    let
       lib = nixpkgs.lib;
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
-    in {
+    in
+  {
     nixosConfigurations = {
       Lappy = lib.nixosSystem {
-        inherit system;
-        modules = [
-          ./configuration.nix
-        ];
+        system = "x86_64-linux";
+	      modules = [ ./configuration.nix ];
       };
+
     };
 
     homeConfigurations = {
       smanahian = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        modules = [
-          ./home.nix
-        ];
+        extraSpecialArgs = { inherit inputs; };
+        modules = [ ./home-manager/home.nix ];
       };
     };
 

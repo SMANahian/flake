@@ -12,16 +12,7 @@
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
-  boot.loader = {
-    efi = {
-      canTouchEfiVariables = true;
-    };
-    # grub = {
-    #    enable = true;
-    #    efiSupport = true;
-    #    device = "/dev/vda";
-    # };
-  };
+  boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "Lappy"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -35,6 +26,15 @@
 
   # Set your time zone.
   time.timeZone = "Asia/Dhaka";
+
+  i18n.inputMethod = {
+    type = "fcitx5";
+    enable = true;
+    fcitx5.addons = with pkgs; [
+      fcitx5-gtk
+      fcitx5-openbangla-keyboard
+    ];
+  };
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -52,12 +52,11 @@
   };
 
   # Enable the X11 windowing system.
-  # You can disable this if you're only using the Wayland session.
   services.xserver.enable = true;
 
-  # Enable the KDE Plasma Desktop Environment.
-  services.displayManager.sddm.enable = true;
-  services.desktopManager.plasma6.enable = true;
+  # Enable the GNOME Desktop Environment.
+  services.xserver.displayManager.gdm.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -93,10 +92,18 @@
     description = "S M A Nahian";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
-      kdePackages.kate
     #  thunderbird
     ];
   };
+
+
+  # For BigSaltyFishes End-4 Dotfiles===============
+  services.udisks2.enable = true;
+  # ================================================
+
+  # Workaround for GNOME autologin: https://github.com/NixOS/nixpkgs/issues/103746#issuecomment-945091229
+  systemd.services."getty@tty1".enable = false;
+  systemd.services."autovt@tty1".enable = false;
 
   # Install firefox.
   programs.firefox.enable = true;
@@ -104,21 +111,30 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  # Enable the Flakes feature and the accompanying new nix command-line tool
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     git
     vscode
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #  wget
   ];
 
-
-  services.udisks2.enable = true;
-
+  fonts.packages = with pkgs; [
+    noto-fonts
+    # noto-fonts-cjk
+    noto-fonts-cjk-sans
+    noto-fonts-cjk-serif
+    noto-fonts-emoji
+    liberation_ttf
+    fira-code
+    fira-code-symbols
+    mplus-outline-fonts.githubRelease
+    dina-font
+    proggyfonts
+    # (nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
+  ];
+  fonts.enableDefaultPackages = false;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -146,5 +162,10 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.11"; # Did you read the comment?
+
+  nix.settings.experimental-features = ["nix-command" "flakes"];
+  programs.hyprland = {
+    enable = true;
+  };
 
 }
